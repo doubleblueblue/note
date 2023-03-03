@@ -25,3 +25,5 @@ typedef struct
 }PER_HANDLE_DATA_ANDCONFIG, * LPPER_HANDLE_DATA_ANDCONFIG;
 ```
 这段代码，在struct PER_HANDLE_DATA perHandleData这句会报不完整类型错误。这个原因是C和CPP的区别，CPP认为结构体和类是相同的。但是C语言没有类，对于直接使用Struct声明的结构体，在使用时都需要使用 struct StructName structValue这种方式使用，对于上述代码中的，可以直接使用即PER_HANDLE_DATA perHandleData就不会报错。根本原因是typedef是把空结构名替换为尾部的第一个变量了，只是省略了使用时的struct，而不是像通用的struct{}pstruct这种，尾部的pstruct是个结构体指针。
+
+5. mingw+gcc+vscode调试的环境配置：sources下载mingw安装到D盘，vs code安装cmake和cmake tools，通过cmake quick start快速创建一个项目，配置对应的kit即可。安装mingw之后记得重启下电脑。
