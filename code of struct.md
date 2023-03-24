@@ -36,7 +36,7 @@ BOOL dataQueuePushBack(LPDATA_QUEUE queue,LPDATA_QUEUE pNext)
         tmp=tmp->next;
     }
     tmp->next=pNext;
-    printf("tmp is 0x%x\n",tmp);
+    //printf("tmp is 0x%x\n",tmp);
     return true;
 }
 
