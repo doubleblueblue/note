@@ -146,3 +146,5 @@ while(i<10){if(i==5){i++;coninue;}i++;}
 50. ssh和scp命令的使用，scp主动发起连接的是客户端，-P指定的是输入地址的端口，也就是说数据流向是scp执行命令->ssh 22端口->ssh -P端口->ssh 服务端。
 
 51. 关于调试信息，在编写调试信息的时候，尽量去写出出了什么错，和为什么会出这个错，比如closeSocket的时候，需要是   closeSocket,socket is %d,because of %d.
+
+52. 不要使用using namespace std,这个最主要的原因是会产生命名域覆盖，比如我们都知道网络程序中会有bind函数用来绑定socket的地址，但std中也有std::bind用来绑定一些信息，比如函数和参数的绑定，或者函数与函数的绑定。总之确实是可能出现命名域的覆盖的，虽然可以通过显式调用std::bind来解决，但是那不如全局都用std::的方式，而不使用using namespace std;
