@@ -27,3 +27,5 @@ typedef struct
 这段代码，在struct PER_HANDLE_DATA perHandleData这句会报不完整类型错误。这个原因是C和CPP的区别，CPP认为结构体和类是相同的。但是C语言没有类，对于直接使用Struct声明的结构体，在使用时都需要使用 struct StructName structValue这种方式使用，对于上述代码中的，可以直接使用即PER_HANDLE_DATA perHandleData就不会报错。根本原因是typedef是把空结构名替换为尾部的第一个变量了，只是省略了使用时的struct，而不是像通用的struct{}pstruct这种，尾部的pstruct是个结构体指针。
 
 5. mingw+gcc+vscode调试的环境配置：sources下载mingw安装到D盘，vs code安装cmake和cmake tools，通过cmake quick start快速创建一个项目，配置对应的kit即可。安装mingw之后记得重启下电脑。
+
+6. C语言，如果是vc6.0的情况下，有可能会出现重复引用头文件的情况，对于VS来讲可以使用ifdef宏解决，对于vc6.0，一种可用的方式是像webdll代码中定义一长串宏，比如ifdef huaduiadhdafhadhhiohieqwhoqweihewqeqhqwehiohiohiaod类似的情况，每个文件中都define一次，这样如果重复引用，就会报错。
