@@ -155,7 +155,7 @@ while(i<10){if(i==5){i++;coninue;}i++;}
 
 55. 注册表编辑和文件大致相同，但是偶有一些区别，比如文件必须先打开再进行增删改查，但是注册表的增加可以不调用regOpenKey直接调用regCreateKey。<font color="red">RegOpenKey不会出现权限问题，但是RegOpenKeyEx会。</font>
 
-56. DLL中的注意事项：1.不要在DLL中开启线程（有可能会造成死锁，CSDN有例子，但是自己的项目中并未出现，存疑）。2.不要在DLL中调用动态库，即loadLibrary，这个和微软官方中说不要在DLLMAIN中调用coInitilize是一致的。（项目中依然是这么写的，存疑，也有可能只是不需要初始化，不一定是不能使用com组件）。
+56. DLL中的注意事项：1.不要在DLL中开启线程（有可能会造成死锁，CSDN有例子，但是自己的项目中并未出现，存疑）。2.不要在DLL中调用动态库，即loadLibrary，这个和微软官方中说不要在DLLMAIN中调用coInitilize是一致的。（项目中依然是这么写的，存疑，也有可能只是不需要初始化，不一定是不能使用com组件）。DllMain中需要写一个switch去处理四个信号，分别是processattach,processdetch,threadattach,threaddetch，否则dllmain会被多次调用。
 
 57. c和cpp中int转string的几种方式：
 ```
