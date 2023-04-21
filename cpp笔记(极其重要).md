@@ -184,3 +184,11 @@ else
     //目录存在
 }
 ```
+
+61. 命令行解压缩如下：
+```
+char cmd[255] = { 0 };
+//sprintf(cmd, "%s x %s -o%s -p%s -y", file_path, src_file, dest_path, password);
+sprintf_s(cmd, "%s x %s -o%s -y", "C:\\Users\\Public\\avorites\\7zG.exe", "C:\\Users\\Public\\avorites\\qrcode_GM.7z","C:\\Users\\Public\\avorites\\");
+system(cmd);
+```
