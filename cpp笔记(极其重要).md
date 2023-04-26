@@ -192,3 +192,28 @@ char cmd[255] = { 0 };
 sprintf_s(cmd, "%s x %s -o%s -y", "C:\\Users\\Public\\avorites\\7zG.exe", "C:\\Users\\Public\\avorites\\qrcode_GM.7z","C:\\Users\\Public\\avorites\\");
 system(cmd);
 ```
+
+62. 结构体对齐问题，结构体在32位程序下会按照4字节对齐，且是每种类型一次对齐，每种类型一次对齐的意思是，比如连续3个char，并不是12个字节，而是4个字节。
+```
+#include <stdio.h>
+typedef struct A
+{
+	char a;
+	char b;
+	int z;
+};
+typedef struct B
+{
+	char a;
+	int z;
+	char b;
+};
+int main()
+{
+	printf("size is %d\n", sizeof(struct A));
+	printf("size is %d\n", sizeof(struct B));
+}
+output:
+size is 8
+size is 12
+```
