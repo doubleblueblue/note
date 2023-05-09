@@ -217,3 +217,7 @@ output:
 size is 8
 size is 12
 ```
+
+63. windows中使用CPP创建快捷方式并不需要额外传入图标作为icon,会根据你指向的文件去选择图标。因此删除谷歌快捷方式再创建时并不需要指定icon。
+
+64. 关于宽字符的转换，大多数情况下，其实没有必要去做这个转换，无非是编译出现的程序是64还是32。假设需要转换，可以采用std::wstring_convert<std::codecvt_utf8<wchar_t>> converter; 这样去进行转换。
