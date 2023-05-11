@@ -1,3 +1,4 @@
+https://account.microsoft.com/services?refd=account.microsoft.com 微软office安装页面
 1. 遍历文件夹，获取文件信息，等操作的函数。
 ```
 //分别遍历文件夹下内容
