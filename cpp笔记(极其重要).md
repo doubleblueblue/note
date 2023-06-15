@@ -253,3 +253,7 @@ foreach(vector.begin(),vector.end();func or lambda);
 std::find(vector.begin(),vector.end(),value);
 ```
 主要说一下foreach的问题，foreach的优点在于并行化，可重入，缺点在于需要传入的是头尾迭代器，以及一个函数指针或者lambda表达式。并行化意味着效率可能会高。如果是简单的逻辑，尽量避免使用传统for循环，因为其实编译器需要考虑到break的情况。
+
+69. 对于控制台退出的自定义函数，网上有两种方式：1-使用atexit函数注册一个回调函数，此函数在任意形式返回0之后触发，例如主函数中return 0,某错误的地方exit(0)等。2-使用钩子，SetConsoleCtrlHandler，MSDN上5S，实际中没有5S供析构，以及获取不够准确，有时候捕捉不到close事件等问题。
+
+70. 在msvc使用mingw编译的静态库时，要注意std的使用情况，dnsServer的lib似乎会导致std::cout冲突，无法正常输出。
