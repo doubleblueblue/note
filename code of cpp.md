@@ -56,3 +56,74 @@ std::vector<std::string> split(const std::string& str, const std::string& delim)
     return res;
 }
 ```
+
+3. base64.cpp   base64编码的实现
+```
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+
+const char base64_table[65] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+
+void base64_encode(const unsigned char* src, int src_len, char* dst) {
+    int i, j;
+    unsigned char buf[3];
+    int len, out_len;
+
+    out_len = 0;
+    for (i = 0; i < src_len; i += 3) {
+        len = src_len - i < 3 ? src_len - i : 3; // 处理剩余部分
+        for (j = 0; j < len; j++) {
+            buf[j] = src[i + j];
+        }
+        dst[out_len++] = base64_table[buf[0] >> 2];
+        dst[out_len++] = base64_table[((buf[0] & 0x03) << 4) | ((len > 1 ? buf[1] : 0) >> 4)];
+        dst[out_len++] = len > 1 ? base64_table[((buf[1] & 0x0f) << 2) | ((len > 2 ? buf[2] : 0) >> 6)] : '=';
+        dst[out_len++] = len > 2 ? base64_table[buf[2] & 0x3f] : '=';
+    }
+    dst[out_len] = '\0';
+}
+
+int base64_decode(const char* src, unsigned char* dst, int max_decoded_len) {
+    int i, j;
+    unsigned char buf[4];
+    int len, out_len;
+    int pad_count = 0;
+
+    out_len = 0;
+    for (i = 0; src[i] != '\0'; i += 4) {
+        len = 3;
+        pad_count = 0;
+        for (j = 0; j < 4; j++) {
+            if (src[i + j] == '=') {
+                pad_count++;
+                buf[j] = 0;
+            }
+            else {
+                buf[j] = strchr(base64_table, src[i + j]) - base64_table;
+            }
+        }
+        switch (pad_count) {
+        case 1:
+            len = 2;
+            break;
+        case 2:
+            len = 1;
+            break;
+        default:
+            break;
+        }
+        if (out_len + len > max_decoded_len) {
+            return -1; // 解码后的字符串过长
+        }
+        dst[out_len++] = (buf[0] << 2) | (buf[1] >> 4);
+        if (len > 1) {
+            dst[out_len++] = (buf[1] << 4) | (buf[2] >> 2);
+        }
+        if (len > 2) {
+            dst[out_len++] = (buf[2] << 6) | buf[3];
+        }
+    }
+    return out_len;
+}
+```
