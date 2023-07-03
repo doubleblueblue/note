@@ -29,3 +29,10 @@ typedef struct
 5. mingw+gcc+vscode调试的环境配置：sources下载mingw安装到D盘，vs code安装cmake和cmake tools，通过cmake quick start快速创建一个项目，配置对应的kit即可。安装mingw之后记得重启下电脑。
 
 6. C语言，如果是vc6.0的情况下，有可能会出现重复引用头文件的情况，对于VS来讲可以使用ifdef宏解决，对于vc6.0，一种可用的方式是像webdll代码中定义一长串宏，比如ifdef huaduiadhdafhadhhiohieqwhoqweihewqeqhqwehiohiohiaod类似的情况，每个文件中都define一次，这样如果重复引用，就会报错。
+
+7. C语言打开文件的时候需要的操作比较多，除了fopen去打开文件获取文件指针以外，还需要通过移动文件指针，或者别的方式获取文件长度。
+```
+fseek(fp,0,SEEK_END);
+int nFileSize=0;
+nFileSize=ftell(fp);
+```
