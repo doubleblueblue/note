@@ -36,3 +36,5 @@ fseek(fp,0,SEEK_END);
 int nFileSize=0;
 nFileSize=ftell(fp);
 ```
+
+8. 血的教训之：linux下写cmd程序一定要区分自定义输出和系统输出，即：自定义输出可以：printf("kali : error is \n");这样就可以区分官方和自定义输出。
