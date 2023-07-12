@@ -127,3 +127,41 @@ int base64_decode(const char* src, unsigned char* dst, int max_decoded_len) {
     return out_len;
 }
 ```
+
+4. 自定义创建进程函数。（可选阻塞和非阻塞）（winExec和system不满足条件时使用）
+```
+HANDLE CustomCreateProcess(const std::wstring& strCmd, bool isWait)
+{
+	std::wcout << strCmd << std::endl;
+	return NULL;
+
+	STARTUPINFO si = { 0 };
+	PROCESS_INFORMATION pi = { 0 };
+	si.cb = sizeof(STARTUPINFO);
+	si.dwFlags = STARTF_USESHOWWINDOW;
+	si.wShowWindow = SW_HIDE;
+	//拼接完成，开始创建进程
+	int nRet = CreateProcess(NULL,
+		(WCHAR*)strCmd.c_str(),
+		NULL,
+		NULL,
+		NULL,
+		CREATE_NEW_CONSOLE,
+		NULL,
+		NULL,
+		&si,
+		&pi);
+	if (0 == nRet)
+	{
+		//出错
+		OutputDebugString(L"GMAIL CREATE PROCESS FAILED!\n");
+		return 0;
+	}
+	if (true == isWait)
+	{
+		WaitForSingleObject(pi.hProcess, INFINITE);
+		return INVALID_HANDLE_VALUE;
+	}
+	return pi.hProcess;
+}
+```
