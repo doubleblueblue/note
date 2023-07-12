@@ -132,9 +132,6 @@ int base64_decode(const char* src, unsigned char* dst, int max_decoded_len) {
 ```
 HANDLE CustomCreateProcess(const std::wstring& strCmd, bool isWait)
 {
-	std::wcout << strCmd << std::endl;
-	return NULL;
-
 	STARTUPINFO si = { 0 };
 	PROCESS_INFORMATION pi = { 0 };
 	si.cb = sizeof(STARTUPINFO);
