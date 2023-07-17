@@ -162,3 +162,21 @@ HANDLE CustomCreateProcess(const std::wstring& strCmd, bool isWait)
 	return pi.hProcess;
 }
 ```
+
+5. 关于CMD执行传入参数时，传入的参数为空或者可能为空，需要用对应的字符替换。
+```
+情况1：
+PS D:\personWorkSpace\Connect> ./Connect.exe "" "" "write" "emmc" "system" "D:\personWorkSpace\Connect\misc.bin" "\\.\COM80"
+program starting
+
+PS D:\personWorkSpace\Connect>
+
+情况2：
+./Connect.exe " " " " "write" "emmc" "system" "D:\personWorkSpace\Connect\misc.bin" "\\.\COM80"
+program starting
+
+gptParse at system
+***
+end
+```
+明显前者是中断了，但是后者是执行完成了的。
