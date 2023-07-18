@@ -1,3 +1,4 @@
+学习网站：https://refactoringguru.cn/design-patterns/factory-method
 # 设计模式基础概念
 大多数设计模式的概念和面向对象的概念是一致的，但有些有些许不同或增补：如下
 1. 混入类(mixin Class):指一个可以继承了多个虚接口的虚类
@@ -8,9 +9,12 @@
 
 
 ### <font color="green">工厂模式(Factory Method)</font> 
-
+在
+工厂也有其分类：</br>
+1. 简单工厂模式，提供默认的实现，创建具体的对象
+2. 工厂方法模式，不提供实现，创建继承于baseFactory的工厂，由工厂进行具体实现
 ### <font color="green">抽象工厂模式(Abstract Factory)</font> 
-
+抽象工厂则是工厂方法模式的一个优化方案，在工厂方法模式下，如果要进行进一步的分类，可能会导致工厂的派生工厂极其之多，抽象工厂则是取其中有共性的一部分，抽象出来一个抽象类。
 ### <font color="green">建造者模式(builder pattern)</font>
 
 ### <font color="green">原型模式(Prototype)</font>
@@ -31,6 +35,7 @@
 ### 责任链模式(Chain of Responsibility)
 ### 命令模式(Command)
 ### 迭代器模式(Iterator)
+迭代器模式在我看来也是策略模式的一种变种，它的主要目的是解决不同方式遍历整个聚合对象。这种不同，就是通过策略模式来实现的。应该说，迭代器模式就是一个重点关注迭代算法步骤的策略。
 ### 中介者模式(Mediator)
 ### 备忘录模式(Memento)
 ### <font color="green">观察者模式(Observer)</font>
@@ -40,3 +45,10 @@
 类图如下：
 <div align='center'><img style="background:CornflowerBlue;color:CornflowerBlue;" src="./pic/umlStrategy.png"></div>
 ### 访问者模式(Vistor)
+访问者模式的优点：
+1. 开闭原则：可以在不同类的对象上执行新的行为,且无需对这些类做修改。（无非是增加个调用，两行代码，不会是加了逻辑的200行）。
+2. 单一职责原则：可以将同一行为的不同版本放在同一个类中。
+3. 访问者对象可以在交互时收集一些对象的有用信息。
+访问者模式的缺点：
+1. 每次在元素层次结构中添加和移除一个类时，都要更新所有的访问者。
+2. 访问者在和对象交互时，是会受到权限的限制的，并不能有protected或者private的权限。
