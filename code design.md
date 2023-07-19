@@ -43,7 +43,7 @@
 ### <font color="green">策略模式(Strategy)</font>
 策略模式的目的是，让一个行为可以方便地替换多种方案，比如函数A有可能使用多种计算方法（变化的），那么我们去额外写一个计算接口类，派生出实际的计算方法。在函数A中声明一个对象，然后在A的计算方法中调用对应的派生出的实际的计算方法。好处是之后需要添加或更改方法的时候只需要派生出新的子类，然后在A中修改调用即可。</br>
 类图如下：
-<div align='center'><img style="background:CornflowerBlue;color:CornflowerBlue;" src="./pic/umlStrategy.png"></div>
+<div align='center'><img style="background:CornflowerBlue;color:CornflowerBlue;" src="./pic/umlStrategy.svg"></div>
 ### 访问者模式(Vistor)
 访问者模式的优点：
 1. 开闭原则：可以在不同类的对象上执行新的行为,且无需对这些类做修改。（无非是增加个调用，两行代码，不会是加了逻辑的200行）。
