@@ -16,7 +16,8 @@
 ### <font color="green">抽象工厂模式(Abstract Factory)</font> 
 抽象工厂则是工厂方法模式的一个优化方案，在工厂方法模式下，如果要进行进一步的分类，可能会导致工厂的派生工厂极其之多，抽象工厂则是取其中有共性的一部分，抽象出来一个抽象类。
 ### <font color="green">建造者模式(builder pattern)</font>
-
+建造者模式是一个优化构造函数的模式，还在苦于构造函数过于庞大，赋值操作过于冗余，总是要给一些不是自己的参数赋值的苦恼吗？考虑一下建造者模式吧。uml图如下：
+<div align='center'><img style="background:CornflowerBlue;color:CornflowerBlue;" src="./pic/umlBuilder.svg"></div>
 ### <font color="green">原型模式(Prototype)</font>
 
 ### <font color="green">单例模式(Singleton)</font>
