@@ -9,10 +9,10 @@
 
 
 ### <font color="green">工厂模式(Factory Method)</font> 
-在
 工厂也有其分类：</br>
 1. 简单工厂模式，提供默认的实现，创建具体的对象
-2. 工厂方法模式，不提供实现，创建继承于baseFactory的工厂，由工厂进行具体实现
+2. 工厂方法模式，不提供实现，创建继承于baseFactory的工厂，由工厂进行具体实现，uml如下：
+<div align='center'><img style="background:CornflowerBlue;color:CornflowerBlue;" src="./pic/umlFactory.svg"></div>
 ### <font color="green">抽象工厂模式(Abstract Factory)</font> 
 抽象工厂则是工厂方法模式的一个优化方案，在工厂方法模式下，如果要进行进一步的分类，可能会导致工厂的派生工厂极其之多，抽象工厂则是取其中有共性的一部分，抽象出来一个抽象类。
 ### <font color="green">建造者模式(builder pattern)</font>
