@@ -180,3 +180,38 @@ gptParse at system
 end
 ```
 明显前者是中断了，但是后者是执行完成了的。
+
+6. 牛批，mfc并没有封装打开文件夹而不打开文件的对话框，因此需要自己进行封装
+```
+BROWSEINFO bi;
+	char Buffer[MAX_PATH];
+
+	//初始化入口参数 bi
+	bi.hwndOwner = NULL;
+	bi.pidlRoot = NULL;
+	bi.pszDisplayName = Buffer;
+	bi.lpszTitle = "文件夹路径选择";
+	bi.ulFlags = BIF_EDITBOX;
+	bi.lpfn = NULL;
+	bi.iImage = IDR_MAINFRAME;
+
+	LPITEMIDLIST pIDList = SHBrowseForFolder(&bi); //调用显示选择对话框 
+						   //注意下 这个函数会分配内存 但不会释放 需要手动释放
+
+
+	if (pIDList)
+	{
+		SHGetPathFromIDList(pIDList, Buffer);
+		//CString GamePath;
+		//GamePath = Buffer; //将文件夹路径保存在CString 对象里面
+		//取得文件夹路径放置Buffer空间
+		//GUI_ShowMessage(true, Buffer);
+
+	}
+
+	CoTaskMemFree(pIDList); //释放pIDList所指向内存空间;
+	TRACE("%d", pIDList);
+
+	// 把变量内容更新到对话框
+	UpdateData(FALSE);
+```
