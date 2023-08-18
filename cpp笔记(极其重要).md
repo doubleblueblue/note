@@ -269,3 +269,37 @@ std::find(vector.begin(),vector.end(),value);
 72. 对于新起进程执行CMD，有几种方案，一种是system执行，这种特点是，阻塞执行，且有界面，且方便使用。一种是winExec执行，这种特点是，非阻塞执行，界面可隐藏或显示，方便使用。还有一种是CreateProcess，不方便使用，但可以设置界面隐藏显示，可以阻塞或非阻塞，自定义空间较大。
 
 73. 对于vector和map，选择时，map要求键是可以排序的，或者说自定义过排序的，但是大多时候我们只想要一个对应关系，这时候可以用vector嵌套pair来做。
+
+74. C式语法和C++式语法最好是不要混用的，举下例：
+```
+#define _CRT_SECURE_NO_WARNINGS
+#include <iostream>
+#include <vector>
+#include <string>
+
+struct PerProcessInfo
+{
+    std::string strIp;
+};
+
+std::vector<PerProcessInfo> vec;
+void f(const std::string& ip)
+{
+    vec.at(0).strIp =ip;
+}
+int main()
+{
+    PerProcessInfo info;
+    info.strIp = "";
+    vec.push_back(info);
+    std::string strIp;
+    char cIp[10] = "123321";
+    strcpy((char*)strIp.c_str(), cIp);
+    f(strIp);
+
+    std::string strIp2 = strIp;
+    std::cout << strIp2 << std::endl;
+    std::cout << vec.at(0).strIp<<std::endl;
+}
+```
+请问strIp2是什么值？空值还是ip值呢？(这个地方有一个特别有意思的现象，你这个代码，对于strIp，特别有意思，从调试器看，是有字符的，但是你获取长度的时候，会发现它是0，你在调试器看strIp2的时候，会发现他是123321，看vec.at(0).strIp的时候，会发现是"")
