@@ -1,0 +1,1 @@
+1. QT的treeView控件拥有比QtreeWidget更高的性能，并且采用的mvc结构，能更好的实现数据和界面的分离。
