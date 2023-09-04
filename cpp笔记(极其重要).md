@@ -306,4 +306,13 @@ int main()
 
 75. 对于枚举类型，这次的需求是，我原先定义的一个结构体中有一个int值作为类型标，但是int值本身不易阅读，因此需要更改成方便阅读的形式。如果在结构中使用枚举类型，则所有用到结构的地方都需要定义此枚举类型，而且由外部直写exe时，传入一个int值和枚举类型是不匹配的。因此，这次我选择了，在结构中使用int值，但是外部使用枚举类型来判断和写入结构的int值。
 
-76. 插播一条c#，c#本身不支持gb2312，有可能需要对应的第三方包，使用vs的发布程序可以生成不需要环境的exe，但是一般还是会有几个dll，在发布文件FolderProfile.pubxml中增加```	<IncludeNativeLibrariesForSelfExtract>True</IncludeNativeLibrariesForSelfExtract>```即可。
+76. 插播一条c#，c#本身不支持gb2312，有可能需要对应的第三方包，使用vs的发布程序可以生成不需要环境的exe，但是一般还是会有几个dll，在发布文件FolderProfile.pubxml中增加`<IncludeNativeLibrariesForSelfExtract>True</IncludeNativeLibrariesForSelfExtract>`	即可。
+
+77. 对于CPP来讲，在iostream中已经包含了std::string，但依然建议引入string.h或者string,原因是头文件中会有一系列的处理函数，比如对于这次的十六进制字符串转int，如果是正常情况需要自己去读取16进制内容，实现起来较为麻烦。但是通过引入头文件，可以有stoi函数，用法如下：
+```
+/// \param 传入的字符串
+/// \param 开始的位置，可以传nullptr从头开始
+/// \param 传入字符串的数字进制，比如16进制，默认是10进制
+int nTmp = std::stoi(strTmp, nullptr, 16);
+```
+建议抛弃atoi转而使用string提供的方法。
