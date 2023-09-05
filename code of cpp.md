@@ -215,3 +215,131 @@ BROWSEINFO bi;
 	// 把变量内容更新到对话框
 	UpdateData(FALSE);
 ```
+
+7. 注册表相关的操作函数,首先是获取子项，传入主KEY和子KEY即可获取，会返回cJson的一个对象：
+```
+cJSON* getSubkeysJson(const std::string& strHKey,const std::string& strSubKey)
+{
+	cJSON* subKeys=nullptr;
+	subKeys = cJSON_CreateArray();
+	HKEY hKey = transString2HKey(strHKey);
+	//打开注册表
+	HKEY queryKey;
+	LSTATUS status=RegOpenKey(hKey, strSubKey.c_str(), &queryKey);
+	if (ERROR_SUCCESS != status)
+	{
+		return nullptr;
+	}
+	DWORD dwSubKeysCount;
+	DWORD dwValuesCount;
+	//获取注册表信息
+	status = RegQueryInfoKey(queryKey,  //查询的注册表项
+		NULL, //lpClass 不关注
+		NULL, //lpcClass 前一个的长度 不关注
+		NULL, //保留字段
+		&dwSubKeysCount, //子项的数量
+		NULL, //子项最长键大小   不关注
+		NULL, //子项最长Class大小  不关注
+		&dwValuesCount, //查询项的值数量
+		NULL, //最长值名称大小   不关注
+		NULL, //最长值大小，不关注
+		NULL, //密钥安全描述符  不关注
+		NULL);  //最后修改时间  不关注 
+
+	//遍历子项
+	if (dwSubKeysCount)
+	{
+		for (int i = 0; i < dwSubKeysCount; i++)
+		{
+			char name[256] = {};
+			memset(name, 0, 256);
+			DWORD dwSize = 255;
+			status = RegEnumKeyExA(queryKey, i, name, &dwSize, NULL, NULL, NULL, NULL);
+			if (ERROR_SUCCESS == status)
+			{
+				std::string tmp = name;
+				cJSON_AddItemToArray(subKeys, cJSON_CreateString(tmp.c_str()));
+			}
+		}
+	}
+	RegCloseKey(queryKey);
+	return subKeys;
+}
+```
+获取注册表值的函数:
+```
+cJSON* CRegistryManager::getValueKeysJson(const std::string& strHKey,const std::string& strSubKey)
+{
+	cJSON* valueKey = nullptr;
+	valueKey = cJSON_CreateArray();
+	//先处理arg1
+	HKEY hKey = transString2HKey(strHKey);
+	//打开注册表
+	HKEY queryKey;
+	LSTATUS status = RegOpenKey(hKey, strSubKey.c_str(), &queryKey);
+	//LSTATUS status = RegOpenKey(hKey, strSubKey.c_str(), NULL, KEY_ALL_ACCESS, &queryKey);
+	if (ERROR_SUCCESS != status)
+	{
+		return nullptr;
+	}
+	DWORD dwSubKeysCount;
+	DWORD dwValuesCount;
+	//获取注册表信息
+	status = RegQueryInfoKey(queryKey,  //查询的注册表项
+		NULL, //lpClass 不关注
+		NULL, //lpcClass 前一个的长度 不关注
+		NULL, //保留字段
+		&dwSubKeysCount, //子项的数量
+		NULL, //子项最长键大小   不关注
+		NULL, //子项最长Class大小  不关注
+		&dwValuesCount, //查询项的值数量
+		NULL, //最长值名称大小   不关注
+		NULL, //最长值大小，不关注
+		NULL, //密钥安全描述符  不关注
+		NULL);  //最后修改时间  不关注 
+
+	//遍历值
+	if (dwValuesCount)
+	{
+		for (int i = 0; i < dwValuesCount; i++)
+		{
+			char valueName[256] = {};
+			memset(valueName, 0, sizeof(valueName));
+			DWORD dwValueNameSize = 255;
+
+			DWORD dwValueType = 0;
+
+			BYTE valueValue[0xffff] = {};
+			memset(valueValue,'\0', sizeof(valueValue));
+			DWORD dwValueValueSize = 0xffff;
+
+			status = RegEnumValue(queryKey, i,
+				valueName,
+				&dwValueNameSize,
+				NULL,
+				&dwValueType,
+				valueValue,
+				&dwValueValueSize);
+
+			if (ERROR_SUCCESS == status)
+			{
+				cJSON* tmp = cJSON_CreateObject();
+				char cType[255] = { '\0' };
+				memset(cType, '\0', sizeof(cType));
+				sprintf(cType, "%d", dwValueType);
+				std::string strType = cType;
+				cJSON_AddItemToObject(tmp, "valueName", cJSON_CreateString(valueName));
+				strType = intRegValue2String(strType);
+				cJSON_AddItemToObject(tmp, "valueType", cJSON_CreateString(strType.c_str()));
+				std::string strValue = regDataToStr(valueValue, dwValueValueSize, dwValueType);
+				cJSON_AddItemToObject(tmp, "valueValue", cJSON_CreateString(strValue.c_str()));
+				cJSON_AddItemToArray(valueKey, tmp);
+			}
+		}
+	}
+	RegCloseKey(queryKey);
+	return valueKey;
+}
+```
+其他都会跟这些函数比较类似，因此不作记录。
+8. 
