@@ -316,3 +316,5 @@ int main()
 int nTmp = std::stoi(strTmp, nullptr, 16);
 ```
 建议抛弃atoi转而使用string提供的方法。
+
+78. 关于QT的QProcess::start()函数，如果你直接传入cmd命令，其实跟在文件资源管理器中执行命令是一样的，他会去找window/system32下的程序，如果只是单句单次，应该是没问题的，这次出现的问题在于我用&将两个命令连在一起执行了，这个是属于cmd的功能，因此应该显式传入CMD.exe，再去执行命令。
