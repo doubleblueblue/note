@@ -342,4 +342,53 @@ cJSON* CRegistryManager::getValueKeysJson(const std::string& strHKey,const std::
 }
 ```
 其他都会跟这些函数比较类似，因此不作记录。
-8. 
+8. 进程信息的遍历，如下:
+```
+std::map<DWORD, std::string> getProcessInfo()
+{
+	std::map<DWORD, std::string> mapReturn;
+	HANDLE hProcessSnapShot = NULL;
+	PROCESSENTRY32 pe32 = { 0 };
+
+	hProcessSnapShot = ::CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, NULL);
+
+	if (hProcessSnapShot == (HANDLE)-1) return std::map<DWORD, std::string>();
+
+	pe32.dwSize = sizeof(PROCESSENTRY32);
+
+	if (Process32First(hProcessSnapShot, &pe32))
+	{
+		do {
+			std::string strTitle = getWindowTitleByProcId(pe32.th32ProcessID);
+			mapReturn.insert(std::pair<DWORD, std::string>(pe32.th32ProcessID, strTitle));
+		} while (Process32Next(hProcessSnapShot, &pe32));
+	}
+	else
+		::CloseHandle(hProcessSnapShot);
+	::CloseHandle(hProcessSnapShot);
+	return mapReturn;
+}
+```
+
+9. wstring和string之间的转换，不涉及编码问题：
+```
+std::string wString2String(const std::wstring & wStr)
+{
+	int nLen = ::WideCharToMultiByte(CP_ACP, NULL, wStr.c_str(), -1, NULL, 0, NULL, NULL);
+	char* buf = new char[nLen];
+	::WideCharToMultiByte(CP_ACP, NULL,wStr.c_str(), -1, buf, nLen, NULL, NULL);
+	std::string str(buf);
+	delete[] buf;
+	return str;
+}
+
+std::wstring string2WString(const std::string& str)
+{
+	int nLen = ::MultiByteToWideChar(CP_ACP, NULL, str.c_str(), -1, NULL, 0);
+	wchar_t* buffer = new wchar_t[nLen];
+	::MultiByteToWideChar(CP_ACP, NULL, str.c_str(),-1,buffer, nLen);
+	std::wstring wStr(buffer);
+	delete[] buffer;
+	return wStr;
+}
+```
