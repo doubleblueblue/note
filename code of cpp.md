@@ -359,8 +359,8 @@ std::map<DWORD, std::string> getProcessInfo()
 	if (Process32First(hProcessSnapShot, &pe32))
 	{
 		do {
-			std::string strTitle = getWindowTitleByProcId(pe32.th32ProcessID);
-			mapReturn.insert(std::pair<DWORD, std::string>(pe32.th32ProcessID, strTitle));
+			std::string strExeFile = pe32.szExeFile;
+			mapReturn.insert(std::pair<DWORD, std::string>(pe32.th32ProcessID, strExeFile));
 		} while (Process32Next(hProcessSnapShot, &pe32));
 	}
 	else
