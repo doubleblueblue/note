@@ -396,26 +396,40 @@ std::wstring string2WString(const std::string& str)
 10. 原生CPP并不提供对字符串进行全部替换的功能，因此如果使用需要自行处理，以下为全部替换的函数:
 ```
 /// \brief 暂时只有1.0，带业务的字符串替换，"\\","\\\\"
-	const char* pChar=strJson.c_str();
-
-	char buffer[1024] = { '\0' };
-	int nPos = 0;
-	while ('\0'!=*pChar)
+const char* pChar=strJson.c_str();
+int nBufferSize = 1024;
+char* pBuffer = (char*)malloc(nBufferSize);
+memset(pBuffer, '\0', nBufferSize);
+int nPos = 0;
+while ('\0'!=*pChar)
+{
+	if ('\\' != *pChar)
 	{
-		if ('\\' != *pChar)
+		pBuffer[nPos] = *pChar;
+		nPos++;
+		pChar++;
+	}
+	else
+	{
+		pBuffer[nPos] = '\\';
+		pBuffer[nPos + 1] = '\\';
+		nPos += 2;
+		pChar++;
+	}
+	if (nBufferSize - nPos <= 100)
+	{
+		//内存不够了
+		void* pNew = realloc(pBuffer, nBufferSize + 1024);
+		if (nullptr != pNew)
 		{
-			buffer[nPos] = *pChar;
-			nPos++;
-			pChar++;
-		}
-		else
-		{
-			buffer[nPos] = '\\';
-			buffer[nPos + 1] = '\\';
-			nPos += 2;
-			pChar++;
+			pBuffer = (char*)pNew;
+			memset(pBuffer + 1024, '\0', 1024);
+			nBufferSize += 1024;
 		}
 	}
-	strJson.clear();
-	strJson = buffer;
+}
+strJson.clear();
+strJson = pBuffer;
+free(pBuffer);
+pBuffer = nullptr;
 ```
