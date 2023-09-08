@@ -392,3 +392,30 @@ std::wstring string2WString(const std::string& str)
 	return wStr;
 }
 ```
+
+10. 原生CPP并不提供对字符串进行全部替换的功能，因此如果使用需要自行处理，以下为全部替换的函数:
+```
+/// \brief 暂时只有1.0，带业务的字符串替换，"\\","\\\\"
+	const char* pChar=strJson.c_str();
+
+	char buffer[1024] = { '\0' };
+	int nPos = 0;
+	while ('\0'!=*pChar)
+	{
+		if ('\\' != *pChar)
+		{
+			buffer[nPos] = *pChar;
+			nPos++;
+			pChar++;
+		}
+		else
+		{
+			buffer[nPos] = '\\';
+			buffer[nPos + 1] = '\\';
+			nPos += 2;
+			pChar++;
+		}
+	}
+	strJson.clear();
+	strJson = buffer;
+```
