@@ -433,3 +433,8 @@ strJson = pBuffer;
 free(pBuffer);
 pBuffer = nullptr;
 ```
+11. lambda表达式示例代码:
+```
+auto plus = [] (int v1, int v2) -> int { return v1 + v2; }
+int sum = plus(1, 2);
+```
