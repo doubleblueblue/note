@@ -449,3 +449,57 @@ pBuffer = nullptr;
 auto plus = [] (int v1, int v2) -> int { return v1 + v2; }
 int sum = plus(1, 2);
 ```
+
+13. 闪退时生成dump文件：
+```
+#include<iostream>
+#include<Windows.h>
+#include<DbgHelp.h>
+using namespace std;
+#pragma comment(lib,"DbgHelp.lib")
+ 
+// 创建Dump文件
+void CreateDumpFile(LPCWSTR lpstrDumpFilePathName, EXCEPTION_POINTERS *pException)
+{
+	HANDLE hDumpFile = CreateFile(lpstrDumpFilePathName, GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+	// Dump信息
+	MINIDUMP_EXCEPTION_INFORMATION dumpInfo;
+	dumpInfo.ExceptionPointers = pException;
+	dumpInfo.ThreadId = GetCurrentThreadId();
+	dumpInfo.ClientPointers = TRUE;
+	// 写入Dump文件内容
+	MiniDumpWriteDump(GetCurrentProcess(), GetCurrentProcessId(), hDumpFile, MiniDumpNormal, &dumpInfo, NULL, NULL);
+	CloseHandle(hDumpFile);
+}
+ 
+// 处理Unhandled Exception的回调函数
+LONG ApplicationCrashHandler(EXCEPTION_POINTERS *pException)
+{
+	CreateDumpFile(L"Test.dmp", pException);
+	cout << "异常已记录" << endl;
+	system("pause");
+	return EXCEPTION_EXECUTE_HANDLER;
+}
+ 
+void func1() {
+	cout << "正常函数" << endl;
+}
+ 
+void func2() {
+	int num = 10;
+	int in;
+	cout << "输入一个整数：" << endl;
+	//当输入为0时则会发生异常
+	cin >> in;
+	num = num / in;
+	cout << num << endl;
+}
+ 
+int main()
+{
+	//注册异常处理函数
+	SetUnhandledExceptionFilter((LPTOP_LEVEL_EXCEPTION_FILTER)ApplicationCrashHandler);
+	func1();
+	func2();
+}
+```
