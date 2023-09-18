@@ -138,7 +138,7 @@ int base64_decode(const char* src, unsigned char* dst, int max_decoded_len) {
 }
 ```
 
-4. 自定义创建进程函数。（可选阻塞和非阻塞）（winExec和system不满足条件时使用）
+5. 自定义创建进程函数。（可选阻塞和非阻塞）（winExec和system不满足条件时使用）
 ```
 HANDLE CustomCreateProcess(const std::wstring& strCmd, bool isWait)
 {
@@ -173,7 +173,7 @@ HANDLE CustomCreateProcess(const std::wstring& strCmd, bool isWait)
 }
 ```
 
-5. 关于CMD执行传入参数时，传入的参数为空或者可能为空，需要用对应的字符替换。
+6. 关于CMD执行传入参数时，传入的参数为空或者可能为空，需要用对应的字符替换。
 ```
 情况1：
 PS D:\personWorkSpace\Connect> ./Connect.exe "" "" "write" "emmc" "system" "D:\personWorkSpace\Connect\misc.bin" "\\.\COM80"
@@ -191,7 +191,7 @@ end
 ```
 明显前者是中断了，但是后者是执行完成了的。
 
-6. 牛批，mfc并没有封装打开文件夹而不打开文件的对话框，因此需要自己进行封装
+7. 牛批，mfc并没有封装打开文件夹而不打开文件的对话框，因此需要自己进行封装
 ```
 BROWSEINFO bi;
 	char Buffer[MAX_PATH];
@@ -226,7 +226,7 @@ BROWSEINFO bi;
 	UpdateData(FALSE);
 ```
 
-7. 注册表相关的操作函数,首先是获取子项，传入主KEY和子KEY即可获取，会返回cJson的一个对象：
+8. 注册表相关的操作函数,首先是获取子项，传入主KEY和子KEY即可获取，会返回cJson的一个对象：
 ```
 cJSON* getSubkeysJson(const std::string& strHKey,const std::string& strSubKey)
 {
@@ -353,7 +353,7 @@ cJSON* CRegistryManager::getValueKeysJson(const std::string& strHKey,const std::
 ```
 其他都会跟这些函数比较类似，因此不作记录。
 
-8. 进程信息的遍历，如下:
+9. 进程信息的遍历，如下:
 ```
 std::map<DWORD, std::string> getProcessInfo()
 {
@@ -381,7 +381,7 @@ std::map<DWORD, std::string> getProcessInfo()
 }
 ```
 
-9. wstring和string之间的转换，不涉及编码问题：
+10. wstring和string之间的转换，不涉及编码问题：
 ```
 std::string wString2String(const std::wstring & wStr)
 {
@@ -404,7 +404,7 @@ std::wstring string2WString(const std::string& str)
 }
 ```
 
-10. 原生CPP并不提供对字符串进行全部替换的功能，因此如果使用需要自行处理，以下为全部替换的函数:
+11. 原生CPP并不提供对字符串进行全部替换的功能，因此如果使用需要自行处理，以下为全部替换的函数:
 ```
 /// \brief 暂时只有1.0，带业务的字符串替换，"\\","\\\\"
 const char* pChar=strJson.c_str();
@@ -444,7 +444,7 @@ strJson = pBuffer;
 free(pBuffer);
 pBuffer = nullptr;
 ```
-11. lambda表达式示例代码:
+12. lambda表达式示例代码:
 ```
 auto plus = [] (int v1, int v2) -> int { return v1 + v2; }
 int sum = plus(1, 2);
