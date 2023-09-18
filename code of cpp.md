@@ -34,30 +34,40 @@ FindClose(handleFile);
 
 2. 分割字符串函数：
 ```
-std::vector<std::string> split(const std::string& str, const std::string& delim) 
+std::vector<std::string> split(const std::string& str, const std::string& delim)
 {
-    std::vector<std::string> res;
-    if ("" == str) return res;
-    //先将要切割的字符串从string类型转换为char*类型
-    char* strs = new char[str.length() + 1]; //不要忘了
-    strcpy_s(strs,str.length(),str.c_str());
+	std::vector<std::string> res;
+	if ("" == str) return res;
+	//先将要切割的字符串从string类型转换为char*类型
+	char* strs = new char[str.length() + 2]; //不要忘了
+	strcpy_s(strs, str.length()+1, str.c_str()); //是有\0导致缓冲区过小，因此上述创建+2，下述复制+1（\0）
 
-    char* d = new char[delim.length() + 1];
-    strcpy_s(d,delim.length(),delim.c_str());
-    char* pPosition = nullptr;
-    char* p = strtok_s(strs, d,&pPosition);
-    while (p) {
-        std::string s = p; //分割得到的字符串转换为string类型
-        res.push_back(s); //存入结果数组
-        p = strtok_s(NULL, d,&pPosition);
-    }
-    delete[] strs;
-    delete[] p;
-    return res;
+	char* d = new char[delim.length() + 2];
+	strcpy_s(d, delim.length()+1, delim.c_str());
+	char* pPosition = nullptr;
+	char* p = strtok_s(strs, d, &pPosition);
+	while (p) {
+		std::string s = p; //分割得到的字符串转换为string类型
+		res.push_back(s); //存入结果数组
+		p = strtok_s(NULL, d, &pPosition);
+	}
+	delete[] strs;
+	delete[] p;
+	return res;
 }
 ```
 
-3. base64.cpp   base64编码的实现
+3. 关于C++中string的理解，比如str.length()是10，则实际上str是一个11字节的字符数组。在从C++ API转为C API时需要注意，否则会拷贝失败，但这些大概率是可以在调试发现的。例证如下：
+```
+std::string strExd = "jpg;md;txt";
+int nLength = strExd.length();  //10
+int nSize = strExd.size();    //10
+int nLs = strlen(strExd.c_str()); //10
+const char* pStr = strExd.c_str(); //如果查看第11个char，可以看到是\0
+```
+结合例2看出，转换时需要多给2个空间，复制时需要多给1个空间。
+
+4. base64.cpp   base64编码的实现
 ```
 #include <stdio.h>
 #include <string.h>
@@ -342,6 +352,7 @@ cJSON* CRegistryManager::getValueKeysJson(const std::string& strHKey,const std::
 }
 ```
 其他都会跟这些函数比较类似，因此不作记录。
+
 8. 进程信息的遍历，如下:
 ```
 std::map<DWORD, std::string> getProcessInfo()
