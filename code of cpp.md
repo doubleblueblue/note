@@ -559,4 +559,29 @@ bool explorePathAndCopyFile(const std::string& strPath, int& nCount)
 }
 
 ```
-以上这段代码中有2个要点：1-利用了nCount计数，实现递去--归来++的层级控制，2-遍历windows的Documents文件夹时，他这个Documents下看不到MyMusic但是可以CD进去，有这个结构目录，也能遍历到，但是会拒绝访问。（应该是win的一个BUG）
+以上这段代码中有2个要点：1-利用了nCount计数，实现递去--归来++的层级控制，2-遍历windows的Documents文件夹时，他这个Documents下看不到MyMusic但是可以CD进去，有这个结构目录，也能遍历到，但是会拒绝访问。（应该是win的一个BUG）    
+15. 获取所有磁盘盘符名称：
+```
+std::vector<std::string> getAllDiskString()
+{
+	std::vector<std::string> vecString;
+	char buffer[1024] = { '\0' };
+	GetLogicalDriveStrings(1024, buffer);
+	char* pChar = buffer;
+
+	while ('\0' != *(pChar + 1) || '\0' != *pChar)
+	{
+		if ('\0' == *pChar)
+		{
+			pChar++;
+			continue;
+		}
+		else
+		{
+			vecString.push_back(std::string(pChar));
+			pChar += strlen(pChar);
+		}
+	}
+	return vecString;
+}
+```
