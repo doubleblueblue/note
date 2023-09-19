@@ -585,3 +585,19 @@ std::vector<std::string> getAllDiskString()
 	return vecString;
 }
 ```
+16. C++容器遍历删除满足条件的元素：
+```
+std::vector <std::string> vecDisk=getAllDiskString();
+auto iterBegin = vecDisk.begin();
+while(iterBegin != vecDisk.end())
+{
+	if (*iterBegin == "C:\\")
+	{
+		iterBegin=vecDisk.erase(iterBegin);
+	}
+	else
+	{
+		iterBegin++;
+	}
+}
+```
