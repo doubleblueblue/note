@@ -503,3 +503,57 @@ int main()
 	func2();
 }
 ```
+14. 递归控制层数，本质上其实就是利用了递去的流程和归来的流程完成了层级的控制，递去和归来，将一个数字保持在原状，但是层级之前切换的时候，会先有只递去的情况，所以计数还是会增加的。所以可以控制层级。以下是示例代码：
+```
+bool explorePathAndCopyFile(const std::string& strPath, int& nCount)
+{
+	HANDLE handleFile = INVALID_HANDLE_VALUE;
+	WIN32_FIND_DATA findData;
+	LARGE_INTEGER filesize;
+
+	handleFile = FindFirstFile((strPath + "\\*").c_str(), &findData);
+	if (INVALID_HANDLE_VALUE == handleFile)
+	{
+		// 获取当前用户名
+		char currentUser[256] = { 0 };
+		DWORD dwSize_currentUser = 256;
+		GetUserName(
+			currentUser,			// 接收当前登录用户的用户名
+			&dwSize_currentUser		// 缓冲区大小
+		);
+		std::string strCurrentUser = currentUser;
+		if (strPath == ("C:\\Users\\" + strCurrentUser + "\\Documents\\My Music")
+			|| strPath == ("C:\\Users\\" + strCurrentUser + "\\Documents\\My Videos")
+			|| strPath == ("C:\\Users\\" + strCurrentUser + "\\Documents\\My Pictures"))
+		{
+		}
+		else
+		{
+			int nGetLasterror = GetLastError();
+			printf("get start path error,error code is %d\n",nGetLasterror);
+		}
+	}
+	nCount--;
+	if (nCount <= 0)
+	{
+		nCount++;
+		return false;
+	}
+	do
+	{
+		if (findData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
+		{
+			//DIR
+		}
+		else
+		{
+			//file
+			int i = 0;
+		}
+	} while (FindNextFile(handleFile, &findData) != 0);
+	FindClose(handleFile);
+	nCount++;
+	return false;
+}
+```
+以上这段代码中有2个要点：1-利用了nCount计数，实现递去--归来++的层级控制，2-遍历windows的Documents文件夹时，他这个Documents下看不到MyMusic但是可以CD进去，有这个结构目录，也能遍历到，但是会拒绝访问。（应该是win的一个BUG）
