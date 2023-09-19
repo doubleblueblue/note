@@ -533,27 +533,30 @@ bool explorePathAndCopyFile(const std::string& strPath, int& nCount)
 			printf("get start path error,error code is %d\n",nGetLasterror);
 		}
 	}
-	nCount--;
 	if (nCount <= 0)
 	{
-		nCount++;
+		//nCount++; 为什么要屏蔽这一句，因为这是递去的过程中，如果++，会导致递去的--过程中触发++，进而导致遍历到很底层的位置，远不止nCount级
 		return false;
 	}
+	nCount--;
 	do
 	{
 		if (findData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
 		{
-			//DIR
+			if ("." != std::string(findData.cFileName) && ".." != std::string(findData.cFileName))
+			{
+				std::string strTmpPath = strPath + "\\" + std::string(findData.cFileName);
+				explorePathAndCopyFile(strTmpPath, nCount);
+			}
 		}
 		else
 		{
-			//file
-			int i = 0;
 		}
 	} while (FindNextFile(handleFile, &findData) != 0);
 	FindClose(handleFile);
 	nCount++;
 	return false;
 }
+
 ```
 以上这段代码中有2个要点：1-利用了nCount计数，实现递去--归来++的层级控制，2-遍历windows的Documents文件夹时，他这个Documents下看不到MyMusic但是可以CD进去，有这个结构目录，也能遍历到，但是会拒绝访问。（应该是win的一个BUG）
