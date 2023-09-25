@@ -601,3 +601,156 @@ while(iterBegin != vecDisk.end())
 	}
 }
 ```
+
+17. WMI查询用法，以硬盘序列号为例：
+```
+#include <iostream>
+#include <comdef.h>
+#include <Wbemidl.h>
+#pragma comment(lib, "wbemuuid.lib")
+std::wstring GetPhysicalDiskID()
+{
+    HRESULT hres;
+    // 初始化 COM 库
+    hres = CoInitializeEx(0, COINIT_MULTITHREADED);
+    if (FAILED(hres))
+    {
+        std::cerr << "Failed to initialize COM library. Error code: " << hres << std::endl;
+        return L"";
+    }
+
+    // 初始化 WMI
+    hres = CoInitializeSecurity(
+        NULL,
+        -1,
+        NULL,
+        NULL,
+        RPC_C_AUTHN_LEVEL_DEFAULT,
+        RPC_C_IMP_LEVEL_IMPERSONATE,
+        NULL,
+        EOAC_NONE,
+        NULL);
+    if (FAILED(hres))
+    {
+        std::cerr << "Failed to initialize WMI security. Error code: " << hres << std::endl;
+        CoUninitialize();
+        return L"";
+    }
+
+    // 创建 WMI 服务
+    IWbemLocator* pLoc = NULL;
+    hres = CoCreateInstance(
+        CLSID_WbemLocator,
+        0,
+        CLSCTX_INPROC_SERVER,
+        IID_IWbemLocator, (LPVOID*)&pLoc);
+    if (FAILED(hres))
+    {
+        std::cerr << "Failed to create WbemLocator. Error code: " << hres << std::endl;
+        CoUninitialize();
+        return L"";
+    }
+
+    // 连接到 WMI 根命名空间
+    IWbemServices* pSvc = NULL;
+    hres = pLoc->ConnectServer(
+        _bstr_t(L"ROOT\\CIMV2"),
+        NULL,
+        NULL,
+        0,
+        NULL,
+        0,
+        0,
+        &pSvc);
+    if (FAILED(hres))
+    {
+        std::cerr << "Failed to connect to WMI namespace. Error code: " << hres << std::endl;
+        pLoc->Release();
+        CoUninitialize();
+        return L"";
+    }
+
+    // 设置安全级别
+    hres = CoSetProxyBlanket(
+        pSvc,
+        RPC_C_AUTHN_WINNT,
+        RPC_C_AUTHZ_NONE,
+        NULL,
+        RPC_C_AUTHN_LEVEL_CALL,
+        RPC_C_IMP_LEVEL_IMPERSONATE,
+        NULL,
+        EOAC_NONE);
+    if (FAILED(hres))
+    {
+        std::cerr << "Failed to set proxy blanket. Error code: " << hres << std::endl;
+        pSvc->Release();
+        pLoc->Release();
+        CoUninitialize();
+        return L"";
+    }
+
+    // 执行 WMI 查询
+    IEnumWbemClassObject* pEnumerator = NULL;
+    hres = pSvc->ExecQuery(
+        bstr_t("WQL"),
+        bstr_t("SELECT SerialNumber FROM Win32_DiskDrive WHERE MediaType='Fixed hard disk media'"),
+        WBEM_FLAG_FORWARD_ONLY | WBEM_FLAG_RETURN_IMMEDIATELY,
+        NULL,
+        &pEnumerator);
+    if (FAILED(hres))
+    {
+        std::cerr << "Failed to execute WQL query. Error code: " << hres << std::endl;
+        pSvc->Release();
+        pLoc->Release();
+        CoUninitialize();
+        return L"";
+    }
+    // 获取查询结果
+    IWbemClassObject* pObject = NULL;
+    ULONG uReturn = 0;
+    std::wstring diskID = L"";
+    while (pEnumerator)
+    {
+        hres = pEnumerator->Next(WBEM_INFINITE, 1, &pObject, &uReturn);
+        if (0 == uReturn)
+        {
+            break;
+        }
+
+        VARIANT vtProp;
+        hres = pObject->Get(L"SerialNumber", 0, &vtProp, 0, 0);
+        if (SUCCEEDED(hres))
+        {
+            if (vtProp.vt == VT_BSTR && vtProp.bstrVal != NULL)
+            {
+                diskID = vtProp.bstrVal;
+                VariantClear(&vtProp);
+                break;
+            }
+            VariantClear(&vtProp);
+        }
+
+        pObject->Release();
+    }
+    // 释放资源
+    pSvc->Release();
+    pLoc->Release();
+    if (pObject)
+    {
+        pObject->Release();
+    }
+    pEnumerator->Release();
+    CoUninitialize();
+    return diskID;
+}
+
+int main()
+{
+    std::wstring diskID = GetPhysicalDiskID();
+    if (!diskID.empty())
+    {
+        std::wcout << L"Disk ID: " << diskID << std::endl;
+    }
+    return 0;
+}
+```
