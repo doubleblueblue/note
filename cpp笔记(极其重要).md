@@ -322,3 +322,5 @@ int nTmp = std::stoi(strTmp, nullptr, 16);
 79. 对于QProgressDialog和QProgressBar的选择，当进度时间短，需要及时更新信息时，应采用QProgressBar。当时间长，且可不及时更新信息时，可以采用QProgressDialog。
 
 80. 对于win api和qt的创建目录的区别，win api传入路径必须只有最后一级不存在，并不会递归创建，但是QT创建目录是可以递归创建的。
+
+81. 对于UI使用配置初始化，不必具有畏难心理，之前的JS解析框架，是因为要求数据上传也使用js来执行，相当于UI和数据提交都使用js,故而需要一个js的完整的解析框架。纯UI配置是可以使用json很方便的初始化的。

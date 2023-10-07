@@ -754,3 +754,73 @@ int main()
     return 0;
 }
 ```
+18. 管道通信的代码示例：通过管道获取CMD的返回值。
+q1:为什么管道和控制台句柄没有明显的关联关系，但是却能拿到控制台返回值？
+a1:因为事实上会把管道的读方向，给cmd的out。
+
+整个的思路流程：
+* 创建管道，其需要注意的点是，安全信息sa中需要设置句柄可继承。
+* 创建进程，其需要注意的是，进程信息中，StartUpInfo中需要设置dwFlags为stdHandles，以及StdOut和stdError绑定到hndWritePipe。
+* 关闭管道句柄，关闭WritePipe
+* 循环ReadFile读取数据即可。只要子程序会退出，主程序中ReadFile会返回false从而从while(1)中break
+```
+std::string CustomCreateProcess(const std::string& strCmd)
+{
+	HANDLE hndReadPipe = INVALID_HANDLE_VALUE;
+	HANDLE hndWritePipe = INVALID_HANDLE_VALUE;
+	SECURITY_ATTRIBUTES sa = { 0 };
+	sa.nLength = sizeof(SECURITY_ATTRIBUTES);
+	sa.lpSecurityDescriptor = NULL;
+	sa.bInheritHandle = TRUE;
+	bool openSuccess = CreatePipe(&hndReadPipe, &hndWritePipe, &sa, 0);
+	if (!openSuccess)
+	{
+		return "";
+	}
+
+	STARTUPINFO si = { 0 };
+	PROCESS_INFORMATION pi = { 0 };
+	si.cb = sizeof(STARTUPINFO);
+	si.dwFlags = STARTF_USESHOWWINDOW | STARTF_USESTDHANDLES;
+	si.wShowWindow = SW_HIDE;
+	si.hStdOutput = hndWritePipe;
+	si.hStdError = hndWritePipe;
+	//拼接完成，开始创建进程
+	int nRet = CreateProcess(NULL,
+		(char*)strCmd.c_str(),
+		NULL,
+		NULL,
+		TRUE,
+		NULL,   //进程创建标志，考虑这个参数对于返回结果的影响
+		NULL,
+		NULL,
+		&si,
+		&pi);
+	if (0 == nRet)
+	{
+		//出错
+		OutputDebugString("GMAIL CREATE PROCESS FAILED!\n");
+		return 0;
+	}
+	CloseHandle(hndWritePipe);
+	std::string strOutput = "";
+	if (openSuccess)
+	{
+		while (1)
+		{
+			DWORD dwReadedLen = 0;
+			char buffer[1024] = { '\0' };
+			//有数据读
+			if (false == ReadFile(hndReadPipe, buffer, 1023, &dwReadedLen, NULL))
+			{
+				int error = GetLastError();
+				break;
+			}
+			strOutput += buffer;
+			Sleep(10);
+		}
+	}
+	WaitForSingleObject(pi.hProcess, INFINITE);
+	return strOutput;
+}
+```
