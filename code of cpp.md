@@ -824,3 +824,25 @@ std::string CustomCreateProcess(const std::string& strCmd)
 	return strOutput;
 }
 ```
+
+19. 获取各个常用文件夹。（此代码之所以会写出来，是因为如果采用自己拼接的方式获取路径，会出现cpp笔记中关于拼接路径的问题）
+```
+std::string getKnownFolderPath(const KNOWNFOLDERID& id)
+{
+	PWSTR pszPath = NULL;
+	if (S_OK != SHGetKnownFolderPath(id, NULL, NULL, &pszPath))
+	{
+		return "";
+	}
+	std::wstring wPath = pszPath;
+	CoTaskMemFree(pszPath);
+	pszPath = NULL;
+
+	int nLen = ::WideCharToMultiByte(CP_ACP, NULL, wPath.c_str(), -1, NULL, 0, NULL, NULL);
+	char* buf = new char[nLen];
+	::WideCharToMultiByte(CP_ACP, NULL, wPath.c_str(), -1, buf, nLen, NULL, NULL);
+	std::string str(buf);
+	delete[] buf;
+	return str;
+}
+```
