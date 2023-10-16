@@ -846,3 +846,11 @@ std::string getKnownFolderPath(const KNOWNFOLDERID& id)
 	return str;
 }
 ```
+
+20. CPP的FileTime转常用的时间格式"2021-10-1 08:00:12"：
+```
+SYSTEMTIME st = { 0 };
+FileTimeToSystemTime(&findData.ftLastWriteTime, &st);
+char buf[64] = { 0 };
+sprintf_s(buf, "%4d-%02d-%02d %02d:%02d:%02d", st.wYear, st.wMonth, st.wDay, st.wHour, st.wMinute, st.wSecond);
+```
