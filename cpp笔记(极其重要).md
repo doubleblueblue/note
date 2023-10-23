@@ -328,3 +328,5 @@ int nTmp = std::stoi(strTmp, nullptr, 16);
 82. mfc会有一个很傻逼的情况，通过new然后create动态创建的控件风格和通过设计器创建的控件风格不一致，有一些控件可以通过调整dwFlags完成style的统一，例如button。但是CEdit是一种内凹的3D样式，这种并不在基础的style中，而是需要使用CreateEx设置额外的样式。
 
 83. MFC不要拼接路径，拼接路径会导致路径固定死在C盘，从而导致电脑如果修改过默认文档位置，则无法执行。以及还有一种情况，修改了账户名，导致路径和账户名不一致的情况，这时不能使用GetUserName拼接，而是要用SH对应API去获取。例如SHGETKNOWNFolderPath;
+
+84. mysql数据库在使用mysqlDump.exe做数据导出时，cmd和powershell是有区别的，powershell导出的sql文件会是utf16le的编码，如果用cmd再做导入，就会出现编码问题。因此建议用cmd导出，用cmd导入(powershell并不方便导入);
