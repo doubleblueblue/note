@@ -246,4 +246,45 @@ int WINAPI CustomMessageBoxA(
 }
 ```
 以上代码组合起来，就可以HOOK32位调用了MessageBoxA的程序。</br>
-* 如果需要HOOK64位程序，应该如何做到？
+
+* 64位Inline Hook:应该说hook的思路本身就是这样，不一定非要去取一整条指令，只要保证第一条替换进去的跳转指令执行即可。后续执行自定义API函数之后再恢复。就能够达到目的并且保存原先程序的完整性。所以32位下的5个字节的说法其实并不固定，如果有需要，你给个10个字节甚至更多也是可以的。因此对于64位HOOK，只需要在原先的基础上删去函数地址计算。即拿即用即可。代码如下：
+```
+class MyHook
+{
+public:
+	static UINT64 Hook(LPCWSTR lpModule, LPCSTR lpFuncName, LPVOID lpFunction)
+	{
+		UINT64 dwAddr = (UINT64)GetProcAddress(GetModuleHandleW(lpModule), lpFuncName);
+		BYTE jmp[] =
+		{
+			0x48, 0xb8,               // jmp
+			0x00, 0x00, 0x00, 0x00,
+			0x00, 0x00, 0x00, 0x00,   // address
+			0x50, 0xc3                // retn
+		};
+
+		ReadProcessMemory(GetCurrentProcess(), (LPVOID)dwAddr, MemoryAddress(), 12, 0);
+		UINT64 dwCalc = (UINT64)lpFunction;
+		memcpy(&jmp[2], &dwCalc, 8);
+
+		WriteProcessMemory(GetCurrentProcess(), (LPVOID)dwAddr, jmp, 12, nullptr);
+		return dwAddr;
+	}
+
+	static BOOL UnHook(LPCWSTR lpModule, LPCSTR lpFuncName)
+	{
+		UINT64 dwAddr = (UINT64)GetProcAddress(GetModuleHandleW(lpModule), lpFuncName);
+
+		if (WriteProcessMemory(GetCurrentProcess(), (LPVOID)dwAddr, MemoryAddress(), 12, 0))
+			return TRUE;
+		return FALSE;
+	}
+
+	static BYTE* MemoryAddress()
+	{
+		static BYTE backup[12];
+		return backup;
+	}
+};
+```
+来自网上的一个hook类。
