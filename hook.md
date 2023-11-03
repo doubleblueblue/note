@@ -290,3 +290,20 @@ public:
 来自网上的一个hook类。
 
 * hook任意地址时，如果使用jmp需要去考虑保存和恢复寄存器的值，这个时候应该保存和恢复哪些寄存器？ push ad,pop ad。
+
+* PE文件中相对虚拟地址（RVA）和文件偏移地址（FOA）的转换：从RVA到FOA就是从文件运行时（动态）的地址转换到磁盘上的地址（静态）。转换方法如下：</br>
+```
+伪代码:
+RVA=VA(虚拟地址，也即内存地址)-ImageBase(映像基址)
+if(RVA在PE头中)
+{
+	FOA=RVA;
+}
+else
+{
+	if(RVA>=VA&&RVA<=VA+内存对齐)
+	{
+		FOA=PointerToRawData+RVA-VA;
+	}
+}
+```
