@@ -309,3 +309,83 @@ else
 ```
 
 * pe文件或者其他文件进行解析时，需要通过二进制方式读取，即"rb"方式，用文本方式读取会少一个字节。
+
+* pe从内存中解析时，反而不需要rva转foa了，因为和文件无关了，直接读偏移就好了。
+
+* pe文件解析函数地址，代码如下：
+```
+char* pContent = (char*)handle;    //handle是从内存中获取的基址
+//pContent已拿到内容，看如何解析
+char* pOffset = pContent;
+IMAGE_DOS_HEADER imageDosHeader;
+memcpy(&imageDosHeader, pOffset, sizeof(imageDosHeader));
+pOffset += sizeof(imageDosHeader);
+
+long long nPos = imageDosHeader.e_lfanew;   //通过这个地方拿偏移，直接到PE头，不要解析DOS STUB
+pOffset = pContent + sizeof(char) * nPos;
+
+IMAGE_NT_HEADERS32 ntHeaders;
+memset(&ntHeaders, 0, sizeof(ntHeaders));
+memcpy(&ntHeaders, pOffset, sizeof(ntHeaders));
+pOffset += sizeof(ntHeaders);
+
+//解析节表头
+int nSections = ntHeaders.FileHeader.NumberOfSections;
+int nTotalSectionSize = nSections * sizeof(IMAGE_SECTION_HEADER);
+IMAGE_SECTION_HEADER* pSectionHeaders = (IMAGE_SECTION_HEADER*)malloc(nTotalSectionSize);
+memset(pSectionHeaders, 0, nTotalSectionSize);
+memcpy(pSectionHeaders, pOffset, nTotalSectionSize);
+pOffset += sizeof(nTotalSectionSize);
+
+std::vector<IMAGE_SECTION_HEADER> vecSectionHeader;
+for (int i = 0; i < nSections; i++)
+{
+	vecSectionHeader.push_back(*(pSectionHeaders + i));
+}
+free(pSectionHeaders);
+pSectionHeaders = nullptr;
+
+StringMap vecFuncs;
+//section已解出，记录下地址并可以完成rva2foa
+UINT uExportAddressFoa = ntHeaders.OptionalHeader.DataDirectory[0].VirtualAddress;
+IMAGE_EXPORT_DIRECTORY exportDir;
+char* pExportDir = pContent + uExportAddressFoa;
+memcpy(&exportDir, pExportDir, sizeof(IMAGE_EXPORT_DIRECTORY));
+
+UINT nameFoa = exportDir.Name;
+UINT AddrOfNameFoa = exportDir.AddressOfNames;
+UINT* pArrAddrName =(UINT*)(pContent + AddrOfNameFoa);
+UINT uAddrOfAddrFunc =exportDir.AddressOfFunctions;
+UINT* pArrAddrFunc = (UINT*)(pContent + uAddrOfAddrFunc);
+UINT16* pAddrOfOrinal = (UINT16*)(exportDir.AddressOfNameOrdinals + pContent);
+for (int i = 0; i < exportDir.NumberOfNames; i++)
+{
+	//先拿名字，再拿函数地址
+	UINT uAddrName = *pArrAddrName;
+	UINT uAddrNameFoa =uAddrName;
+	char* pName = pContent + uAddrNameFoa;
+	std::string strFuncName = pName;
+
+	if ("MessageBoxA" == strFuncName)
+	{
+		int i = 0;
+	}
+
+	//序号表拿序号
+	UINT16 dwIndex = pAddrOfOrinal[i];
+
+	//到地址表找地址
+	INT uAddrFunc = pArrAddrFunc[dwIndex];
+	UINT test=(UINT)(pContent + uAddrFunc);
+	int c = 0;
+	pArrAddrName++;
+}
+```
+上述中最重要的是函数名称表，函数地址表，函数序号表三张表的关系。如下：
+<table>
+<tr><th colspan="2">函数名称表</th><th colspan="2">函数序号表</th><th colspan="3">函数地址表</th></tr>
+<tr><th>0</th><th>add</th><th>0</th><th>0x0100</th><th>0</th><th>0x1010</th><th>sub</th></tr>
+<tr><th>1</th><th>sub</th><th>1</th><th>0x0000</th><th>1</th><th>0x2020</th><th>add</th></tr>
+<tr><th>2</th><th>dic</th><th>2</th><th>0x0200</th><th>2</th><th>0x3030</th><th>dic</th></tr>
+</table>
+找的顺序是，先找函数名称表，比如sub，确定其序号为1之后，去序号表中找序号为1的元素，发现地址为0x0000，作为函数地址表的序号。去找0。得到sub的地址。其中导出表的base属性是函数地址表的起始序号，大多数时候不一定有用。
