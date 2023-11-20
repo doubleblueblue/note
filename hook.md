@@ -476,3 +476,7 @@ UINT scanNullInSections()
 	return 0;
 }
 ```
+
+* 文件感染大致思路：通过熟练的FOA和RVA之间的转换。修改PE文件的入口点，在PE文件的text端寻找空间，插入shellcode，然后shellcode中增加跳回到入口点的汇编代码。
+
+* linux下的PIE编译选项是GCC默认开启的。开启后编译出的程序类型是DYN(Share object file),关闭时编译出的程序类型是EXEC(Executable file),两者的区别在于后者会从固定地址加载程序，而前者则是从随机地址加载程序。类似于Windows的随机基址机制。
