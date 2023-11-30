@@ -43,3 +43,32 @@ fseek(fp,0,SEEK_SET);
 9. 关于字符串拷贝，对于C语言，字符串拷贝时最好还是使用strcpy进行拷贝，而不是使用memcpy，后者会导致按照数组方式遍历字符串时出错。（可能是因为字符串并不严格按照字符数组的方式存储？）
 
 10. C语言或CPP都会有的一个问题，对于一个指针来讲，p++的步长究竟是多少字节。问题本身其实并不需要纠结。纯粹是因为太久了基础忘记了。步长的定义是根据元素的长度来的，步长一定是n个元素的长度，元素本身的长度则另说。因此步长的字节数应该是n*sizeof(元素);
+
+11. 关于flock，基本的用法如下
+```
+//用于处理文件锁的函数，防止程序被重复打开
+bool isAlreadyRunning()
+{
+	int lock_fd=-1;
+	lock_fd=open("/home/temp.lock",O_CREAT,0777);
+	if(-1==lock_fd)
+	{
+		lock_fd=open("/home/temp.lock",O_RDWR,0777);
+		if(-1==lock_fd)
+		{
+			return -1;
+		}
+	}
+	int rc=flock(lock_fd,LOCK_EX|LOCK_NB);
+	if(0==rc)
+	{
+		return 0;
+	}
+	else
+	{
+		
+		return errno;
+	}
+}
+```
+其中open是正常的打开文件方式，返回一个文件描述符，通过flock对文件进行加锁，Lock_Ex控制了锁的类型是排他锁，Lock_nb是控制接下来请求锁，锁对进程的反应，是阻塞，或非阻塞，nb是非阻塞式。那么考虑fork或者execve对锁数据结构的影响，如果父进程先flock获取了锁，之后fork，子进程同样会获取锁，如果子进程重新申请锁，则会覆盖原先的锁，相当于进行了锁类型的修改。
