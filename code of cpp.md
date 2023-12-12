@@ -854,3 +854,27 @@ FileTimeToSystemTime(&findData.ftLastWriteTime, &st);
 char buf[64] = { 0 };
 sprintf_s(buf, "%4d-%02d-%02d %02d:%02d:%02d", st.wYear, st.wMonth, st.wDay, st.wHour, st.wMinute, st.wSecond);
 ```
+
+21. 函数的循环调用，除了通常在外部做一个while(1)循环调用某个函数之外，还有一种方式去循环调用。即函数自身调用自身，但是并不递归，因为在return语句中。代码逻辑如下：
+```
+fun2()
+{
+	while(func())
+	{
+		do
+	}
+}
+bool func()
+{
+	if(100==g_count)
+	{
+		return true;
+	}
+	else
+	{
+		g_count++;
+		return func();
+	}
+}
+```
+如上的函数则是执行100次func之后结束。应用场景：在github上的一个keylog源码用到了这种写法。区别主要是外部调用返回的时候是否执行。
