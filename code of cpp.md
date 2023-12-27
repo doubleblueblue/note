@@ -878,3 +878,25 @@ bool func()
 }
 ```
 如上的函数则是执行100次func之后结束。应用场景：在github上的一个keylog源码用到了这种写法。区别主要是外部调用返回的时候是否执行。
+
+22. 编码转换函数，gbk转utf8：
+```
+std::string string2UTF8(const std::string& strSrc)
+{
+	int nwLen = ::MultiByteToWideChar(CP_ACP, 0, strSrc.c_str(), -1, NULL, 0);
+	wchar_t* pwBuf = new wchar_t[nwLen + 1];//一定要加1，不然会出现尾巴
+	ZeroMemory(pwBuf, nwLen * 2 + 2);
+	::MultiByteToWideChar(CP_ACP, 0, strSrc.c_str(), strSrc.length(), pwBuf, nwLen);
+	int nLen = ::WideCharToMultiByte(CP_UTF8, 0, pwBuf, -1, NULL, NULL, NULL, NULL);
+	char* pBuf = new char[nLen + 1];
+	ZeroMemory(pBuf, nLen + 1);
+	::WideCharToMultiByte(CP_UTF8, 0, pwBuf, nwLen, pBuf, nLen, NULL, NULL);
+	std::string retStr(pBuf);
+	delete[]pwBuf;
+	delete[]pBuf;
+
+	pwBuf = NULL;
+	pBuf = NULL;
+	return retStr;
+}
+```
